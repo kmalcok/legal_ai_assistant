@@ -1,0 +1,93 @@
+# ----------------------------
+# Repo-wide .gitignore
+# (Python backend + Vite/React frontend + deploy)
+# ----------------------------
+
+# ---- Secrets / env ----
+.env
+.env.*
+!.env.example
+!/backend/env.example
+# Plain env files (these previously leaked a real key into history)
+prod-env
+dev-env
+*-env
+!*.example
+
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+.hypothesis/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Node / frontend ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+dist/
+build/
+.vite/
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs / temp ----
+*.log
+logs/
+*.tmp
+*.swp
+
+# ---- App runtime artifacts ----
+**/uploads/
+
+# ---- Repo-specific generated artifacts / large local data ----
+frontend/backend-repo/mevzuat_chunked.json
+
+# ---- RAG: keep only code, ignore everything else under backend/rag ----
+backend/rag/**
+!backend/rag/**/
+!backend/rag/**/*.py
+!backend/rag/**/*.sql
+!backend/rag/**/*.md
+!backend/rag/**/*.txt
+!backend/rag/**/README.md
+!backend/rag/__init__.py
+
+# But still ignore common RAG datasets/artifacts even if they include text
+backend/rag/gerekceli_kanunlar/txt_versions/
+backend/rag/**/*.pdf
+backend/rag/**/*.json
+backend/rag/**/*.ndjson
+backend/rag/**/*.xlsx
+backend/rag/mevzuat_chunked.json
+backend/rag/chunking_output/
+backend/rag/scraping/mevzuat-pdfler/
+backend/rag/scraping/mevzuat-master/
+backend/rag/scraping/mevzuat-extra/
+
+backend/example_repo
+backend/agent.json
+# Vendored/legacy backend copy (not tracked)
+frontend/backend-repo/
+frontend/public/videos
+

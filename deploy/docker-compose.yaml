@@ -1,0 +1,52 @@
+services:
+  backend:
+    image: yargucu-backend:latest
+    build:
+      context: ../backend
+    container_name: yargucu-backend
+    # Put your production values into ../backend/.env on the server
+    env_file:
+      - ../backend/.env
+    environment:
+      # Ensure container can reach Redis service by name if REDIS_URL not set in .env
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    extra_hosts:
+      # Lets the container reach MariaDB installed on the host (Linux only).
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+    ports:
+      # Expose only on localhost; host Nginx should be the public entrypoint.
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    image: yargucu-frontend:latest
+    build:
+      context: ../frontend
+    container_name: yargucu-frontend
+    depends_on:
+      - backend
+    environment:
+      # Runtime API base URL for the SPA (optional).
+      # Leave empty to use same-origin (/v1/*) via Nginx proxy rules.
+      - API_BASE_URL=${API_BASE_URL:-}
+      # Runtime override for the landing-page demo video URL.
+      - DEMO_VIDEO_URL=${DEMO_VIDEO_URL:-https://yargucu.com.tr/videos/yargucu-demo.mp4}
+      # Nginx inside the frontend container proxies /v1/* to this upstream.
+      - API_UPSTREAM=${API_UPSTREAM:-http://backend:8000}
+    ports:
+      # Expose only on localhost; host Nginx should be the public entrypoint.
+      - "127.0.0.1:8080:80"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: yargucu-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:

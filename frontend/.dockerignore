@@ -1,0 +1,18 @@
+# Keep Docker build context small for the frontend image.
+node_modules/
+dist/
+build/
+.vite/
+.git/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.*
+
+

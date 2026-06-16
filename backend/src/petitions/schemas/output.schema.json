@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DilekceOutput",
+  "type": "object",
+  "required": [
+    "meta",
+    "header_blocks",
+    "sections",
+    "signature"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "document_type",
+        "court"
+      ],
+      "properties": {
+        "document_type": {
+          "type": "string"
+        },
+        "court": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "style": {
+          "type": "object",
+          "properties": {
+            "font_name": {
+              "type": "string",
+              "default": "Times New Roman"
+            },
+            "font_size_pt": {
+              "type": "number",
+              "default": 12
+            },
+            "heading_size_pt": {
+              "type": "number",
+              "default": 14
+            },
+            "line_spacing": {
+              "type": "number",
+              "default": 1.5
+            },
+            "margins_cm": {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number",
+                  "default": 2.5
+                },
+                "bottom": {
+                  "type": "number",
+                  "default": 2.5
+                },
+                "left": {
+                  "type": "number",
+                  "default": 3.75
+                },
+                "right": {
+                  "type": "number",
+                  "default": 2.5
+                }
+              }
+            }
+          }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "header_blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "value"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "style": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string",
+                "enum": [
+                  "red"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "urgent_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "blocks"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "text"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "paragraph",
+                    "numbered",
+                    "bullets",
+                    "block_quote"
+                  ]
+                },
+                "text": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "name_line",
+        "phrase"
+      ],
+      "properties": {
+        "name_line": {
+          "type": "string"
+        },
+        "phrase": {
+          "type": "string",
+          "default": "Vekil olarak talep ederim."
+        },
+        "place_date_line": {
+          "type": "string"
+        }
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
+

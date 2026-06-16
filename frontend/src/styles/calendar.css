@@ -1,0 +1,788 @@
+/* Yargucu - Takvim sayfasi stilleri */
+
+.takvim-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: #ffffff;
+  color: #181a1f;
+}
+
+.takvim-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  /* Top padding accounts for notch / dynamic island via the global PWA inset var. */
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 24px 12px;
+  border-bottom: 1px solid #e7e7eb;
+}
+
+.takvim-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #444;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 6px 8px;
+  transition: background 120ms ease;
+}
+
+.takvim-back:hover {
+  background: #f3f3f4;
+}
+
+.takvim-back-glyph {
+  display: inline-block;
+  font-size: 18px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.takvim-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.takvim-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.takvim-title-separator {
+  color: #c2c4cc;
+}
+
+.takvim-subtitle {
+  color: #5a5d68;
+  font-size: 14px;
+  margin: 0;
+}
+
+.takvim-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.takvim-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 24px;
+  margin-top: 12px;
+  border-bottom: 1px solid #ececef;
+}
+
+.takvim-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #5a5d68;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.takvim-tab:hover {
+  color: #181a1f;
+}
+
+.takvim-tab.is-active {
+  color: #181a1f;
+  border-bottom-color: #181a1f;
+  font-weight: 600;
+}
+
+.takvim-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  flex-wrap: wrap;
+}
+
+.takvim-toolbar-spacer {
+  flex: 1;
+}
+
+.takvim-status-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: #f5f5f7;
+  border-radius: 9px;
+}
+
+.takvim-status-chip {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #44464d;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.takvim-status-chip.is-active {
+  background: #ffffff;
+  color: #181a1f;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  font-weight: 600;
+}
+
+.takvim-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 0 24px 32px;
+}
+
+.takvim-body.is-month {
+  grid-template-columns: minmax(360px, 1fr) minmax(280px, 360px);
+}
+
+@media (max-width: 880px) {
+  .takvim-body.is-month {
+    grid-template-columns: 1fr;
+  }
+}
+
+.takvim-month-card {
+  background: #ffffff;
+  border: 1px solid #ececef;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.takvim-month-card .rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #181a1f;
+  --rdp-background-color: #f3f3f4;
+  margin: 0;
+}
+
+.takvim-month-card .rdp-day {
+  position: relative;
+}
+
+.takvim-month-card .rdp-day_button {
+  border-radius: 8px;
+}
+
+.takvim-day-marker {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.takvim-day-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #181a1f;
+  display: inline-block;
+}
+
+.takvim-day-dot.is-warning {
+  background: #f59e0b;
+}
+
+.takvim-day-dot.is-critical {
+  background: #dc2626;
+}
+
+.takvim-day-dot.is-overdue {
+  background: #7f1d1d;
+}
+
+.takvim-day-dot.is-done {
+  background: #9ca3af;
+}
+
+.takvim-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fafafb;
+  border: 1px solid #ececef;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 300px;
+}
+
+.takvim-side-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c6f77;
+  margin-bottom: 4px;
+}
+
+.takvim-empty {
+  color: #6c6f77;
+  font-size: 13px;
+  padding: 12px 4px;
+}
+
+.takvim-error {
+  color: #b91c1c;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+/* Agenda */
+.takvim-agenda {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.takvim-agenda-day {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.takvim-agenda-day-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #e3e3e7;
+}
+
+.takvim-agenda-day-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.takvim-agenda-day-rel {
+  font-size: 12px;
+  color: #6c6f77;
+}
+
+/* EventCard */
+/* SaaS Task Item Design */
+.takvim-event-card {
+  position: relative;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.takvim-event-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.takvim-event-card.event-urgency-critical {
+  border-left: 4px solid #ef4444;
+}
+
+.takvim-event-card.event-urgency-warning {
+  border-left: 4px solid #f97316;
+}
+
+.takvim-event-card.event-urgency-overdue {
+  border-left: 4px solid #dc2626;
+  background: #fffafa;
+}
+
+.takvim-event-card.event-urgency-muted {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+/* Internal components are handled by Tailwind classes in EventCard.jsx, 
+   but we can add global overrides here if needed. */
+
+
+/* Dialog form */
+.takvim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.takvim-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.takvim-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.takvim-form-label {
+  font-size: 12px;
+  color: #44464d;
+  font-weight: 500;
+}
+
+.takvim-form-input,
+.takvim-form-textarea {
+  border: 1px solid #d8d9de;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #181a1f;
+  font-family: inherit;
+}
+
+.takvim-form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.takvim-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.takvim-form-error {
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.takvim-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #181a1f;
+  color: #ffffff;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.takvim-add-btn:hover {
+  background: #2a2c33;
+}
+
+.takvim-loading {
+  color: #6c6f77;
+  font-size: 13px;
+  padding: 24px;
+  text-align: center;
+}
+
+/* Sidebar - Zaman Takibi list */
+.sidebar-deadline-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.sidebar-deadline-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sidebar-deadline-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted-foreground, #6c6f77);
+}
+
+.sidebar-deadline-date {
+  white-space: nowrap;
+}
+
+.sidebar-deadline-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: 999px;
+  background: #f3f3f4;
+  color: #44464d;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.sidebar-deadline-pill.is-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.sidebar-deadline-pill.is-critical {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sidebar-deadline-pill.is-overdue {
+  background: #7f1d1d;
+  color: #fff5f5;
+}
+
+.sidebar-deadline-footer {
+  margin-top: 2px;
+}
+
+.sidebar-deadline-all {
+  font-size: 12px;
+  color: var(--muted-foreground, #6c6f77);
+  font-style: italic;
+}
+
+.sidebar-deadline-all:hover {
+  color: #181a1f;
+}
+
+/* Dialog overlay + modal */
+.takvim-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 17, 22, 0.45);
+  z-index: 80;
+  border: none;
+  cursor: default;
+  width: 100%;
+  height: 100%;
+}
+
+.takvim-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: 14px;
+  width: min(520px, calc(100vw - 32px));
+  /* Use dynamic viewport height so Safari's collapsing toolbar doesn't crop the dialog
+     and so safe-area insets are subtracted from the actual usable height. */
+  max-height: calc(100dvh - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  padding: 18px 20px 16px;
+  box-shadow: 0 12px 30px rgba(15, 17, 22, 0.25);
+  z-index: 90;
+}
+
+.takvim-dialog-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.takvim-dialog-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.takvim-dialog-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #5a5d68;
+  /* ≥40×40 touch target for thumb access; visual ×-glyph stays small via line-height. */
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+.takvim-dialog-close:focus-visible {
+  outline: 2px solid #181a1f;
+  outline-offset: 2px;
+}
+
+.takvim-dialog-close:hover {
+  color: #181a1f;
+}
+
+/* Dark mode overrides for sidebar use */
+.dark .takvim-agenda-day-head {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .takvim-agenda-day-title {
+  color: hsl(var(--sidebar-foreground));
+}
+
+.dark .takvim-agenda-day-rel {
+  color: hsl(var(--sidebar-foreground) / 0.5);
+}
+
+.dark .takvim-event-card {
+  background: hsl(var(--sidebar-background));
+  border-color: hsl(var(--sidebar-border));
+  color: hsl(var(--sidebar-foreground));
+}
+
+.dark .takvim-event-card:hover {
+  border-color: hsl(var(--sidebar-accent));
+}
+
+.dark .takvim-event-title {
+  color: hsl(var(--sidebar-foreground));
+}
+
+.dark .takvim-event-note {
+  color: hsl(var(--sidebar-foreground) / 0.8);
+}
+
+.dark .takvim-event-meta {
+  color: hsl(var(--sidebar-foreground) / 0.6);
+}
+
+.dark .takvim-event-pill {
+  background: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+.dark .takvim-event-pill.is-critical {
+  background: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+}
+
+.dark .takvim-event-pill.is-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.dark .takvim-event-pill.is-overdue {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+.dark .takvim-event-action {
+  border-color: hsl(var(--sidebar-border));
+  color: hsl(var(--sidebar-foreground) / 0.8);
+}
+
+.dark .takvim-event-card {
+  background: #1c1c1e;
+  border-color: #2c2c2e;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark .takvim-event-card:hover {
+  border-color: #3a3a3c;
+}
+
+.dark .takvim-event-action {
+  background: #2c2c2e;
+  border-color: #3a3a3c;
+  color: #a1a1aa;
+}
+
+.dark .takvim-event-action:hover {
+  background: #3a3a3c;
+  color: #ffffff;
+}
+
+.dark .takvim-event-action.is-primary {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.dark .takvim-event-action.is-danger {
+  color: #f87171;
+  background: transparent;
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
+.dark .takvim-event-actions {
+  border-top-color: #2c2c2e;
+}
+
+.dark .takvim-empty {
+  color: hsl(var(--sidebar-foreground) / 0.4);
+}
+
+
+/* Calendar Event Dots */
+.rdp-day_button::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  display: none;
+}
+
+.has-event-critical .rdp-day_button::after {
+  display: block;
+  background-color: #ef4444; /* Red */
+  box-shadow: 0 0 4px #ef4444;
+}
+
+.has-event-warning .rdp-day_button::after {
+  display: block;
+  background-color: #f97316; /* Orange */
+}
+
+.has-event-normal .rdp-day_button::after {
+  display: block;
+  background-color: #3b82f6; /* Blue */
+}
+
+.dark .has-event-critical .rdp-day_button::after {
+  background-color: #f87171;
+}
+
+.dark .has-event-warning .rdp-day_button::after {
+  background-color: #fb923c;
+}
+
+/* Selected Day Style Override */
+.rdp-day_button[data-selected-single="true"] {
+  background-color: #18181b !important; /* Zinc-900 (Black-ish) */
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-width: 0px !important;
+  --tw-ring-color: transparent !important;
+}
+
+.dark .rdp-day_button[data-selected-single="true"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-width: 0px !important;
+}
+
+
+/* Remove default focus/selected circles if any */
+.rdp-day_button:focus,
+.rdp-day_button:focus-visible,
+.rdp-day_button:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Fix for "today" blue color if any */
+.rdp-day_button[data-today="true"]:not([data-selected-single="true"]) {
+  color: #3b82f6; /* Keep today blue if not selected, or change to something else? */
+}
+
+.rdp-day_button[data-selected-single="true"]::before {
+  display: none !important;
+}
+
+
+
+
+/* Responsive Dialog Improvements */
+@media (max-width: 520px) {
+  .takvim-dialog {
+    width: 92vw !important;
+    max-width: 420px;
+    padding: 20px 16px;
+    border-radius: 16px;
+    max-height: 90vh;
+    box-sizing: border-box;
+  }
+
+  .takvim-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .takvim-form-field {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .takvim-form-input, 
+  .takvim-form-textarea {
+    width: 100% !important;
+    box-sizing: border-box;
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+
+  /* Specific fix for time selects on mobile */
+  .takvim-form-field .flex.items-center.gap-2 {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .takvim-form-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+    padding-top: 16px;
+  }
+
+  .takvim-event-action {
+    width: 100%;
+    height: 50px;
+    margin: 0 !important;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: background 0.2s;
+    background: #f4f4f5;
+    color: #18181b;
+    border: 1px solid #e4e4e7;
+  }
+
+  .takvim-event-action.is-primary {
+    background: #18181b;
+    color: #ffffff;
+    border-color: #18181b;
+  }
+
+  .takvim-dialog-head {
+    margin-bottom: 16px;
+  }
+}

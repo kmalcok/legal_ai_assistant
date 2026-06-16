@@ -1,0 +1,5 @@
+{
+  "embeddings_seconds": 30,
+  "summarizer_seconds": 30,
+  "search_agent_seconds": 300
+}

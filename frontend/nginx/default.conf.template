@@ -1,0 +1,95 @@
+server {
+  listen 80;
+  server_name _;
+
+  root /usr/share/nginx/html;
+  index index.html;
+  etag on;
+
+  # gzip for common text assets
+  gzip on;
+  gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+  # Cache policy:
+  # - SPA HTML must NOT be cached (prevents "blank white screen" after redeploy due to stale HTML referencing old hashed assets)
+  # - hashed assets can be cached aggressively
+  # - service worker and runtime config must always be revalidated
+  location = /runtime-config.js {
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+    try_files $uri =404;
+  }
+
+  location = /sw.js {
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+    add_header Service-Worker-Allowed "/" always;
+    try_files $uri =404;
+  }
+
+  location = /manifest.webmanifest {
+    default_type application/manifest+json;
+    add_header Cache-Control "public, max-age=3600" always;
+    try_files $uri =404;
+  }
+
+  location ~* ^/(workbox-[a-z0-9_-]+\.js)$ {
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files $uri =404;
+  }
+
+  location ~* ^/(favicon\.svg|favicon\.png|apple-touch-icon\.png|pwa-192x192\.png|pwa-512x512\.png|maskable-icon\.png|hukukai\.svg)$ {
+    add_header Cache-Control "public, max-age=604800" always;
+    try_files $uri =404;
+  }
+
+  location /assets/ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    try_files $uri =404;
+  }
+  location = /vite.svg {
+    add_header Cache-Control "public, max-age=604800";
+    try_files $uri =404;
+  }
+  location = /favicon.ico {
+    add_header Cache-Control "public, max-age=604800";
+    try_files $uri =404;
+  }
+
+  # Backend API (FastAPI) - proxy to keep same-origin and support streaming
+  location /v1/ {
+    proxy_pass ${API_UPSTREAM};
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # WebSocket upgrade headers (for /v1/ws/*)
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_read_timeout 3600s;
+
+    # Important for fetch streaming (/v1/chat/stream)
+    proxy_buffering off;
+    proxy_cache off;
+  }
+
+  # Noise/security hardening: don't let SPA fallback respond 200 for common exploit probes
+  location ~* \.php$ { return 404; }
+  location ~* ^/(wp-admin|wp-login\.php|wp-content|wp-includes)/ { return 404; }
+
+  # SPA routing: serve index.html for all non-file routes (React Router)
+  location / {
+    # Make sure SPA HTML is never cached (applies to /, /chat/15, /login, etc.)
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+    etag off;
+    if_modified_since off;
+    try_files $uri $uri/ /index.html;
+  }
+}
+

@@ -1,0 +1,147 @@
+## /etc/nginx/sites-available/admin.yargucu.com.tr
+#
+# Assumes:
+# - Frontend container exposed on 127.0.0.1:8080
+# - Backend container exposed on 127.0.0.1:8000
+# - This host is protected by nginx basic auth
+# - ACME webroot is /var/www/certbot
+#
+# After certbot, it can inject the 443 server block automatically.
+
+map $http_upgrade $connection_upgrade {
+  default upgrade;
+  ''      close;
+}
+
+server {
+  listen 80;
+  listen [::]:80;
+
+  server_name admin.yargucu.com.tr;
+
+  client_max_body_size 100m;
+
+  # Let certbot challenge pass without auth.
+  location /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+    auth_basic off;
+  }
+
+  # Protect the admin host with basic auth.
+  auth_basic "Restricted Admin";
+  auth_basic_user_file /etc/nginx/.htpasswd-admin;
+
+  # SSE endpoint
+  location = /v1/chat/stream {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_http_version 1.1;
+
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_read_timeout 3600;
+    proxy_send_timeout 3600;
+
+    add_header X-Accel-Buffering no;
+    gzip off;
+  }
+
+  # Backend API
+  location /v1/ {
+    proxy_pass http://127.0.0.1:8000;
+    proxy_http_version 1.1;
+
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_read_timeout 300;
+    proxy_send_timeout 300;
+
+    proxy_set_header Upgrade    $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+  }
+
+  # Block common probes
+  location ~* \.php$ { return 404; }
+  location ~* ^/(wp-admin|wp-login\.php|wp-content|wp-includes)/ { return 404; }
+  location = /.env { return 404; }
+
+  # Static assets
+  location = /runtime-config.js {
+    proxy_pass http://127.0.0.1:8080;
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+  }
+
+  location = /sw.js {
+    proxy_pass http://127.0.0.1:8080;
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+    add_header Service-Worker-Allowed "/" always;
+  }
+
+  location = /manifest.webmanifest {
+    proxy_pass http://127.0.0.1:8080;
+    add_header Cache-Control "public, max-age=3600" always;
+  }
+
+  location ~* ^/(workbox-[a-z0-9_-]+\.js)$ {
+    proxy_pass http://127.0.0.1:8080;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+  }
+
+  location ~* ^/(favicon\.svg|favicon\.png|apple-touch-icon\.png|pwa-192x192\.png|pwa-512x512\.png|maskable-icon\.png|hukukai\.svg)$ {
+    proxy_pass http://127.0.0.1:8080;
+    add_header Cache-Control "public, max-age=604800" always;
+  }
+
+  location /assets/ {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+  }
+
+  location = /vite.svg {
+    proxy_pass http://127.0.0.1:8080;
+    add_header Cache-Control "public, max-age=604800" always;
+  }
+
+  location = /favicon.ico {
+    proxy_pass http://127.0.0.1:8080;
+    add_header Cache-Control "public, max-age=604800" always;
+  }
+
+  # SPA entry
+  location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_set_header Upgrade    $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+  }
+}

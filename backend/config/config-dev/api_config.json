@@ -1,0 +1,38 @@
+{
+  "rate_limit_rps": 50,
+  "path_rate_limits_rpm": {
+    "/v1/auth/login": 20,
+    "/v1/auth/register": 10,
+    "/v1/auth/refresh": 60,
+    "/v1/auth/logout": 60,
+    "/v1/auth/forgot_password": 2,
+    "/v1/auth/reset_password/confirm": 10,
+    "/v1/auth/dev/issue": 5,
+    "/v1/public/active-user-count": 60
+  },
+  "law_agent_max_turns": 99,
+  "cors_enabled": true,
+  "jwt_mode": "hs256",
+  "jwt_kid": "",
+  "jwt_private_key_path": "",
+  "jwt_public_key_path": "",
+  "jwt_secret_min_length": 32,
+  "jwt_require_strong_secret": false,
+  "auth_dev_mode": false,
+  "auth_debug": true,
+  "mail_verification_enabled": true,
+  "trust_proxy": true,
+  "trusted_proxy_ips": [
+    "127.0.0.1",
+    "::1"
+  ],
+  "allowed_http_origins": [
+    "*"
+  ],
+  "allowed_ws_origins": [
+    "*"
+  ],
+  "password_reset_token_ttl_seconds": 7200,
+  "password_reset_url_base": "https://yargucu.com.tr/reset-password",
+  "support_sender_name": "Yargucu Support"
+}

@@ -1,0 +1,105 @@
+4 Worker'da Çöküp Tek Worker'da Çalışmasının Nedenleri
+Kodu tarayınca birkaç birbirinden bağımsız sorun buldum. Hiçbiri tek worker'da belli olmuyor, hepsi multi-worker'da patlıyor.
+
+1. ⚠️ KRİTİK: REDIS_SHUTDOWN_FLUSH_MODE=flushall (tek başına her şeyi açıklayabilir)
+backend/.env:28:
+
+REDIS_SHUTDOWN_FLUSH_MODE=flushall
+app.py'deki shutdown handler (_shutdown_cleanup, 402-423. satırlar):
+
+
+app.py
+Lines 402-411
+        if flush_mode != "off":
+            try:
+                redis_client = RedisMemory().redis
+                try:
+                    if flush_mode == "flushall":
+                        await redis_client.flushall()
+                    else:
+                        await redis_client.flushdb()
+Sorun: Her FastAPI worker process'i kendi shutdown'unda tüm Redis'i siliyor (FLUSHALL). Multi-worker senaryosunda:
+
+Bir worker herhangi bir sebeple restart ederse (OOM, health-check fail, reload, rolling update, crash) → diğer 3 worker'ın da cache/state'ini siler.
+Global rate limiter, memory, session vb. ne varsa bir anda buhar olur.
+Diğer worker'lar Redis'ten okuma/yazma yapıyorken FLUSHALL gelirse → key'ler kaybolur, assertion/KeyError şelalesi → onlar da çöker → kaskad restart.
+Dolayısıyla tek worker'da "yalnızsın, nasıl olsa yeni başlıyorsun" zararı yok; multi-worker'da bir domino etkisi var.
+Çözüm (en acil): Prod'da bunu off yap. Redis'i flush etmek lazımsa deploy script'inden bir kez yap, app shutdown'ında asla yapma.
+
+REDIS_SHUTDOWN_FLUSH_MODE=off
+2. ⚠️ APP_WORKER_COUNT env'de 1 ama gerçekte 4 çalışıyor → DB pool'u patlar
+backend/.env:26-27:
+
+APP_WORKER_COUNT=1
+DB_TOTAL_POOL_SIZE=5
+db_pool_size() hesabı (config/__init__.py:160-169):
+
+DB_TOTAL_POOL_SIZE=5, APP_WORKER_COUNT=1 → per_process = 5 / 1 = 5
+Yani her worker kendine 5 connection açmaya çalışıyor.
+4 worker → 4 * 5 = 20 connection talep eder. Ama intent'in 5 toplamdı.
+MariaDB max_connections'ı düşükse → "Too many connections" hatası → worker çöker → uvicorn restart.
+Ayrıca her worker kendi ConnectionPool'unu init ederken MariaDB'ye 5 fiziksel bağlantı açar, ve bu close_db_pool() sırasında (#1 yüzünden sık sık tetiklenen shutdown) drain edilir. Ama tamamen drain olmadan yeni process init başlarsa → "conn leak" → connection limiti daha da erken dolar.
+
+Çözüm: APP_WORKER_COUNT gerçek worker sayısıyla eşit olmalı. Prod'da 4 worker çalıştırıyorsan:
+
+APP_WORKER_COUNT=4
+DB_TOTAL_POOL_SIZE=20   # MariaDB max_connections'a göre ayarla
+Kod per_process = 20/4 = 5 yapacak, intent doğru olacak. APP_WORKER_COUNT sadece pool hesabı için kullanılıyor; uvicorn'u başlatan şey (k8s/compose) --workers 4'ü ayrıca verir — bu iki değerin manuel senkronu şart.
+
+3. ⚠️ Startup'ta 4 worker aynı anda ağır işi yapıyor
+Her worker create_app()'te şunları yapıyor:
+
+MySQL probe (DB'ye bağlan, SELECT 1)
+auth_tables kontrolü (prod'da zorunlu, bunda hata olursa RuntimeError → worker boot başarısız → uvicorn exit code != 0 → sürekli restart)
+warm_ictihat_daire_cache (arka planda ama yine de her worker bunu çalıştırıyor — 4x aynı sorgu)
+run_active_user_count_updater (her 4 worker de aynı periodic task'ı koşuyor, 4x duplicate iş + race)
+public_stats_service.run_active_user_count_updater çok büyük ihtimalle DB'ye periyodik yazan bir task. 4 worker aynı anda yazarsa UPDATE/INSERT race, deadlock, unique violation olabilir. Ayrıca startup'ta 4 worker aynı anda auth_tables sorgusu atarsa MariaDB de overload olabilir (pool yeni oluşuyor, connection burst).
+
+Çözüm: Periodic task'ı sadece 1 worker'a kısıtla. İki yol:
+
+Kolay (leader lock): Redis'te SET NX ile bir leader-lock al, lock alabilen worker task'ı çalıştırsın, diğerleri pas geçsin.
+Daha temiz: Bu tarz periodic işleri uvicorn worker'ından al, ayrı bir python -m worker process'i veya cron/scheduled job olarak koş.
+Auth tables kontrolünü create_app() içinden startup event'e zaten taşımışsın (yukarıdaki kod onu startup eventinde yapıyor), ama "prod'da dev_mode=0 ise startup'ta başarısız → RuntimeError" hâlâ geçerli. DB'niz startup ilk saniyede tüm worker'ları kabul edemiyorsa cascade crash olur. Bir worker başlasın, sağlıklı olduğunu gösterince diğerleri başlasın (graceful / staggered start, uvicorn flag: --timeout-graceful-shutdown, k8s: startupProbe + maxSurge=1).
+
+4. ⚠️ _CONN_LAST_PING_TS sözlüğü id(conn) anahtarıyla büyüyor
+db.py:136,190-210:
+
+_CONN_LAST_PING_TS: dict[int, float] = {}
+Her connection'a id(conn) ile kayıt düşüyor ama hiçbir yerde silinmiyor. Connection GC olunca id yeniden kullanılabilir → başka bir connection'ın ping'i yanlış güncellenir. Tek worker'da sorun azdır, çok trafikte/pool reconnect olaylarında yan etkileri artar.
+
+Büyük sorun değil ama multi-worker + yüksek trafikte stale ping'e sebep olabilir.
+
+Çözüm: conn.close() sırasında _CONN_LAST_PING_TS.pop(id(conn), None) yap, ya da WeakKeyDictionary kullan.
+
+5. Dockerfile worker sayısı hard-coded değil
+
+Dockerfile
+Lines 55-55
+CMD ["python", "-m", "uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+Demek ki --workers 4'ü dışarıdan (k8s deployment, docker-compose override, Procfile) geçiriyorsun. O dosyada APP_WORKER_COUNT env'i 4'e set ettiğinden emin ol. Büyük olasılıkla şu an APP_WORKER_COUNT=1 gidiyor ve #2'deki DB pool yanlışlığı oluşuyor.
+
+Önerilen Aksiyon Sırası
+Hemen prod .env/secret'larında:
+
+REDIS_SHUTDOWN_FLUSH_MODE=off
+APP_WORKER_COUNT=4
+DB_TOTAL_POOL_SIZE=<MariaDB max_connections'ın %70'i kadar>
+Sadece bu üç değişiklik crash'leri muhtemelen %90 durdurur.
+
+Uvicorn launch komutunda --workers 4 ve env'deki APP_WORKER_COUNT=4 daima senkron olsun. İstersen main.py'de APP_WORKER_COUNT'u zorla dayatabiliriz:
+
+workers = int(os.getenv("APP_WORKER_COUNT", "1"))
+uvicorn.run("src.api.app:app", host="0.0.0.0", port=8000, workers=workers, ...)
+Böylece tek değişken yerine iki değişken olma sorunu kalkar.
+
+active_user_count_updater'a leader-lock (Redis SET NX EX) ekle — 4 kopya yerine 1.
+
+MariaDB max_connections değerini kontrol et (genelde varsayılan 151'dir). 4 worker × 5 pool = 20; rahatlıkla oturur. Ama başka servisler varsa hesaplaman gerek.
+
+K8s kullanıyorsan:
+
+startupProbe (ilk başlatma kontrol), readinessProbe (/v1/health) ekle.
+maxSurge: 1, maxUnavailable: 0 rolling update → worker'ların topluca restart olmasını engelle.
+Bu beş adımdan sonra hâlâ restart varsa container log'unda exit code + son 30 satırı iste, oraya bakalım.
+
+İstersen 1. ve 2. adımı hemen kod tarafında sabitleyeyim (.env'i değiştirmem, ama main.py'yi APP_WORKER_COUNT'tan okuyacak hale getirip config'e uyarı/otomatik senk ekleyebilirim). Haber ver.

@@ -1,0 +1,11 @@
+{
+  "log_level": "INFO",
+  "dev_mode": 0,
+  "request_logging_enabled": 1,
+  "request_exception_stacktrace_enabled": 0,
+  "dev_logging_enabled": 0,
+  "colorize_search_logs": 0,
+  "auth_audit_logging_enabled": 1,
+  "agent_audit_logging_enabled": 0,
+  "agent_audit_max_chars": 12000
+}

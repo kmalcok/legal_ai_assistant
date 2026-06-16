@@ -1,0 +1,13 @@
+{
+  "log_level": "INFO",
+  "dev_mode": 1,
+  "request_logging_enabled": 1,
+  "request_exception_stacktrace_enabled": 1,
+  "dev_logging_enabled": 1,
+  "colorize_search_logs": 1,
+  "auth_audit_logging_enabled": 1,
+  "agent_audit_logging_enabled": 1,
+  "agent_audit_max_chars": 12000,
+  "libreoffice_logging_enabled": 1,
+  "reportlab_logging_enabled": 1
+}

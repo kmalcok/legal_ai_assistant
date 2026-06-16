@@ -1,0 +1,990 @@
+/* ================================================================
+   Shadcn Sidebar CSS — Premium sidebar-07 pattern
+   ================================================================ */
+
+:root {
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 240 5.9% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 240 5% 64.9%;
+}
+
+.dark {
+  --sidebar-background: 240 5.9% 10%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 240 4.9% 83.9%;
+}
+
+/* ─── Fallback utility classes ────────────────────────────────── */
+.bg-sidebar { background-color: hsl(var(--sidebar-background)); }
+.text-sidebar-foreground { color: hsl(var(--sidebar-foreground)); }
+.bg-sidebar-primary { background-color: hsl(var(--sidebar-primary)); }
+.text-sidebar-primary-foreground { color: hsl(var(--sidebar-primary-foreground)); }
+.bg-sidebar-accent { background-color: hsl(var(--sidebar-accent)); }
+.text-sidebar-accent-foreground { color: hsl(var(--sidebar-accent-foreground)); }
+.border-sidebar-border { border-color: hsl(var(--sidebar-border)); }
+.hover\:bg-sidebar-accent:hover { background-color: hsl(var(--sidebar-accent)); }
+.hover\:text-sidebar-accent-foreground:hover { color: hsl(var(--sidebar-accent-foreground)); }
+
+/* ─── Custom scrollbars ───────────────────────────────────────── */
+.chat-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--sidebar-border)) transparent;
+}
+.chat-sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.chat-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--sidebar-border));
+  border-radius: 10px;
+}
+
+.sidebar-section-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--sidebar-border)) transparent;
+}
+
+.sidebar-section-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-section-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-section-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--sidebar-border));
+  border-radius: 10px;
+}
+
+/* ================================================================
+   MOBILE SIDEBAR (sheet / drawer)
+   ================================================================ */
+
+.sidebar-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.sidebar-mobile-panel {
+  position: fixed;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0;
+  z-index: 50;
+  width: var(--sidebar-width, 320px);
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  background-color: hsl(var(--sidebar-background));
+  color: hsl(var(--sidebar-foreground));
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12), 1px 0 4px rgba(0, 0, 0, 0.06);
+  transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.sidebar-mobile-panel.sidebar-mobile-open { transform: translateX(0); }
+.sidebar-mobile-panel.sidebar-mobile-closed { transform: translateX(-100%); }
+
+.sidebar-mobile-panel[data-side="right"] {
+  left: auto;
+  right: 0;
+}
+
+.sidebar-mobile-panel[data-side="right"].sidebar-mobile-closed {
+  transform: translateX(100%);
+}
+
+
+/* ================================================================
+   DESKTOP SIDEBAR — collapsible with smooth transitions
+   ================================================================ */
+
+/* Gap element that reserves space for the sidebar */
+.sidebar-desktop-gap {
+  position: relative;
+  width: var(--sidebar-width);
+  transition: width 200ms ease;
+  flex-shrink: 0;
+}
+
+/* When collapsed to icon mode, shrink gap */
+.sidebar-desktop-gap[data-state="collapsed"][data-collapsible="icon"] {
+  width: var(--sidebar-width-icon);
+}
+
+/* When collapsed to offcanvas, remove gap completely */
+.sidebar-desktop-gap[data-state="collapsed"][data-collapsible="offcanvas"] {
+  width: 0;
+}
+
+/* The actual sidebar panel */
+.sidebar-desktop-panel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  width: var(--sidebar-width);
+  transition: left 200ms ease, right 200ms ease, width 200ms ease;
+  background-color: hsl(var(--sidebar-background));
+  color: hsl(var(--sidebar-foreground));
+  border-right: 1px solid hsl(var(--sidebar-border));
+}
+
+.sidebar-desktop-panel[data-side="right"] {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 1px solid hsl(var(--sidebar-border));
+}
+
+/* Collapsed to icon mode */
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] {
+  width: var(--sidebar-width-icon);
+}
+
+/* Collapsed offcanvas — hide */
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="offcanvas"] {
+  width: 0;
+  overflow: hidden;
+  border: none;
+  pointer-events: none;
+}
+
+.sidebar-desktop-panel[data-side="right"][data-state="collapsed"][data-collapsible="offcanvas"] {
+  right: calc(var(--sidebar-width) * -1);
+}
+
+.sidebar-desktop-panel[data-side="left"][data-state="collapsed"][data-collapsible="offcanvas"] {
+  left: calc(var(--sidebar-width) * -1);
+}
+
+/* Inner container for overflow handling */
+.sidebar-desktop-inner {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─── Icon-collapse visual adjustments ────────────────────────── */
+
+/* Hide text/overflow items when collapsed to icon */
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-group-label,
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-menu-sub,
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-footer-area,
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-brand-btn .grid,
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-brand-btn .sidebar-collapse-btn,
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] [data-sidebar="menu-button"] span,
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] [data-sidebar="menu-button"] svg.ml-auto {
+  display: none !important;
+}
+
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-menu-button {
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-menu-button svg:first-child {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar-desktop-panel[data-state="collapsed"][data-collapsible="icon"] .sidebar-brand-icon {
+  width: 32px;
+  height: 32px;
+}
+
+/* ================================================================
+   SIDEBAR RAIL — thin hover strip on right edge
+   ================================================================ */
+.sidebar-rail {
+  position: absolute;
+  inset-block: 0;
+  right: -4px;
+  z-index: 20;
+  width: 4px;
+  cursor: ew-resize;
+  border: none;
+  padding: 0;
+  background: transparent;
+  transition: background-color 200ms ease;
+  outline: none;
+}
+
+.sidebar-rail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 4px;
+  transition: background-color 200ms;
+}
+
+.sidebar-rail:hover::after,
+.sidebar-rail:focus-visible::after {
+  background-color: hsl(var(--sidebar-border));
+}
+
+/* ================================================================
+   SIDEBAR TRIGGER BUTTON (for SidebarInset header)
+   ================================================================ */
+.sidebar-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 150ms ease, background-color 150ms ease;
+  outline: none;
+  height: 28px;
+  width: 28px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--sidebar-foreground));
+  cursor: pointer;
+}
+
+.sidebar-trigger-btn:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+/* ================================================================
+   SIDEBAR INSET — main content area
+   ================================================================ */
+.sidebar-inset {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  background-color: var(--background);
+}
+
+
+
+/* ================================================================
+   SIDEBAR BRAND (TeamSwitcher-style logo)
+   ================================================================ */
+.sidebar-brand-btn {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sidebar-brand-btn--chat {
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 14px;
+}
+
+.sidebar-brand-btn--chat:hover {
+  background: linear-gradient(180deg, hsl(var(--sidebar-accent) / 0.95), hsl(var(--sidebar-background)));
+}
+
+.sidebar-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-icon--assistant {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(165deg, white 0%, hsl(var(--sidebar-accent)) 100%);
+  border: 1px solid hsl(var(--sidebar-primary) / 0.08);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-brand-image {
+  width: 26px !important;
+  height: 26px !important;
+  object-fit: contain;
+  transform: scale(1.4);
+  transform-origin: center;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .sidebar-brand-image {
+  transform: scale(1.5);
+}
+
+.sidebar-brand-copy {
+  min-width: 0;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+
+.sidebar-brand-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: hsl(var(--sidebar-primary));
+  line-height: 1.2;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5px 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 99px;
+  background: hsl(var(--sidebar-primary) / 0.05);
+  color: hsl(var(--sidebar-primary) / 0.6);
+  border: 1px solid hsl(var(--sidebar-primary) / 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.sidebar-brand-kicker {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: hsl(var(--sidebar-foreground) / 0.45);
+}
+
+.sidebar-collapse-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--sidebar-foreground) / 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.sidebar-collapse-btn:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-foreground));
+}
+
+@media (min-width: 768px) {
+  .sidebar-collapse-btn {
+    display: flex;
+  }
+}
+
+/* ================================================================
+   SIDEBAR CONTENT — scrollable area
+   ================================================================ */
+.sidebar-content-area {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--sidebar-border)) transparent;
+}
+
+.sidebar-panel-group {
+  flex: 0 0 auto;
+  min-height: 0;
+  padding: 6px 8px;
+}
+
+.sidebar-panel-menu {
+  display: flex;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+.sidebar-panel-item {
+  display: flex;
+  flex: 0 0 auto;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.sidebar-panel-item[data-state="open"] {
+  flex: 0 1 auto;
+}
+
+.sidebar-panel-content {
+  display: flex;
+  flex: 0 1 auto;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.sidebar-panel-sub {
+  display: flex;
+  flex: 0 1 auto;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.sidebar-panel-scroll {
+  --sidebar-row-height: 34px;
+  --sidebar-empty-row-count: 1;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: min(
+    calc(var(--sidebar-list-count, var(--sidebar-empty-row-count)) * var(--sidebar-row-height)),
+    calc(var(--sidebar-max-visible-rows, 8) * var(--sidebar-row-height))
+  );
+}
+
+/* ================================================================
+   SIDEBAR FOOTER
+   ================================================================ */
+.sidebar-footer-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid hsl(var(--sidebar-border));
+}
+
+/* ================================================================
+   SIDEBAR GROUP — section container
+   ================================================================ */
+.sidebar-group {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  padding: 8px;
+}
+
+/* ================================================================
+   SIDEBAR GROUP LABEL — section title
+   ================================================================ */
+.sidebar-group-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: 32px;
+  font-size: 12px;
+  font-weight: 500;
+  color: hsl(var(--sidebar-foreground) / 0.5);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  outline: none;
+  transition: margin 200ms ease;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Section badge (count) */
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  background: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-foreground) / 0.6);
+  border: 1px solid hsl(var(--sidebar-border) / 0.6);
+}
+
+/* ================================================================
+   SIDEBAR MENU (ul)
+   ================================================================ */
+.sidebar-menu {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ================================================================
+   SIDEBAR MENU ITEM (li)
+   ================================================================ */
+.sidebar-menu-item {
+  position: relative;
+  list-style: none;
+}
+
+/* ================================================================
+   SIDEBAR MENU BUTTON — primary nav item
+   ================================================================ */
+.sidebar-menu-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.4;
+  outline: none;
+  transition: background-color 120ms ease, color 120ms ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: hsl(var(--sidebar-foreground));
+  text-decoration: none;
+}
+
+.sidebar-menu-button:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+.sidebar-menu-button-active {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+  font-weight: 500;
+}
+
+/* Size variant: lg (for brand/user areas) */
+.sidebar-menu-button[data-size="lg"] {
+  padding: 8px;
+  font-size: 14px;
+}
+
+
+
+.sidebar-menu-button svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   SIDEBAR MENU ACTION (small action button on item)
+   ================================================================ */
+.sidebar-menu-action {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  aspect-ratio: 1;
+  width: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--sidebar-foreground));
+  cursor: pointer;
+  outline: none;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.sidebar-menu-action:hover {
+  background-color: hsl(var(--sidebar-accent));
+}
+
+.sidebar-menu-action-hover {
+  opacity: 0;
+}
+
+.sidebar-menu-item:hover .sidebar-menu-action-hover {
+  opacity: 1;
+}
+
+/* ================================================================
+   SIDEBAR MENU SUB — nested submenu
+   ================================================================ */
+.sidebar-menu-sub {
+  display: flex;
+  min-width: 0;
+  translate: 2px 0;
+  flex-direction: column;
+  gap: 1px;
+  border-left: 1px solid hsl(var(--sidebar-border));
+  padding: 0;
+  padding-inline-start: 16px;
+  padding-block: 4px;
+  margin: 0;
+  list-style: none;
+}
+
+/* ================================================================
+   SIDEBAR MENU SUB BUTTON — nested item
+   ================================================================ */
+.sidebar-menu-sub-button {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: hsl(var(--sidebar-foreground) / 0.7);
+  outline: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.sidebar-menu-sub-button:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+.sidebar-menu-sub-button-active,
+.sidebar-menu-sub-button .sidebar-sub-active {
+  color: hsl(var(--sidebar-accent-foreground));
+  font-weight: 500;
+}
+
+/* Active state for sub button children */
+.sidebar-sub-active {
+  color: hsl(var(--sidebar-accent-foreground)) !important;
+  font-weight: 500;
+  background-color: hsl(var(--sidebar-accent));
+  border-radius: 6px;
+}
+
+.sidebar-chat-link {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding-right: 32px;
+  text-align: left;
+}
+
+.sidebar-sub-link {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding-right: 32px;
+  text-align: left;
+}
+
+.sidebar-chat-label {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-sub-link > .truncate {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Sub item delete/action buttons ──────────────────────────── */
+.sidebar-sub-delete {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--sidebar-foreground) / 0.4);
+  cursor: pointer;
+  outline: none;
+  opacity: 0;
+  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.sidebar-sub-delete:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-foreground));
+}
+
+[data-sidebar="menu-sub-item"]:hover .sidebar-sub-delete,
+.group\/sub-item:hover .sidebar-sub-delete {
+  opacity: 1;
+}
+
+/* Sub action (dropdown trigger in sub items) */
+.sidebar-sub-action {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--sidebar-foreground) / 0.4);
+  cursor: pointer;
+  outline: none;
+  opacity: 0;
+  transition: opacity 120ms ease, background-color 120ms ease;
+}
+
+.sidebar-sub-action:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-foreground));
+}
+
+[data-sidebar="menu-sub-item"]:hover .sidebar-sub-action,
+.group\/sub-item:hover .sidebar-sub-action {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .sidebar-sub-action {
+    opacity: 1 !important;
+    width: 28px !important;
+    height: 28px !important;
+    right: 4px !important;
+    color: hsl(var(--sidebar-foreground) / 0.7) !important;
+  }
+}
+
+/* ================================================================
+   İçtihat Ara link in footer
+   ================================================================ */
+.ictihat-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: hsl(var(--sidebar-primary));
+  background: linear-gradient(180deg, hsl(var(--sidebar-background)), hsl(var(--sidebar-accent)));
+  border: 1px solid hsl(var(--sidebar-border));
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  transition: border-color 150ms ease, background-color 150ms ease, transform 120ms ease, box-shadow 150ms ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.ictihat-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #000;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.ictihat-link-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.ictihat-link-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.ictihat-link-subtitle {
+  font-size: 11px;
+  color: hsl(var(--sidebar-foreground) / 0.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ictihat-link-arrow {
+  color: hsl(var(--sidebar-foreground) / 0.4);
+  flex-shrink: 0;
+  transition: transform 150ms ease, color 150ms ease;
+}
+
+.ictihat-link:hover {
+  border-color: hsl(var(--sidebar-primary) / 0.12);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+  transform: translateY(-1px);
+}
+
+.ictihat-link:hover .ictihat-link-arrow {
+  color: hsl(var(--sidebar-primary));
+  transform: translate(1px, -1px);
+}
+
+.ictihat-link:active {
+  transform: scale(0.98);
+}
+
+/* ================================================================
+   Section dividers (legacy, keep for backwards compat)
+   ================================================================ */
+.sidebar-section-divider {
+  height: 1px;
+  margin: 2px 16px;
+  background: linear-gradient(90deg, transparent, hsl(var(--sidebar-border)), transparent);
+  opacity: 0.5;
+}
+
+/* ================================================================
+   Legacy sidebar-section-trigger (backwards compat)
+   ================================================================ */
+.sidebar-section-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: hsl(var(--sidebar-foreground) / 0.5);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.sidebar-section-trigger:hover {
+  color: hsl(var(--sidebar-foreground) / 0.75);
+  background: hsl(var(--sidebar-accent) / 0.5);
+}
+
+.sidebar-section-trigger .section-chevron {
+  width: 14px;
+  height: 14px;
+  color: hsl(var(--sidebar-foreground) / 0.3);
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+}
+
+/* Legacy menu item btn */
+.sidebar-menu-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: hsl(var(--sidebar-foreground) / 0.75);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.sidebar-menu-item-btn:hover {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-foreground));
+}
+
+.sidebar-menu-item-btn.active {
+  background-color: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-foreground));
+  font-weight: 600;
+}
+
+.sidebar-menu-item-btn .item-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.sidebar-menu-item-btn:hover .item-icon,
+.sidebar-menu-item-btn.active .item-icon {
+  opacity: 0.85;
+}
+
+.sidebar-menu-item-btn .item-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
